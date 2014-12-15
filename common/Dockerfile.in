@@ -1,0 +1,39 @@
+
+# OSIAM resource server
+
+FROM debian:wheezy
+
+MAINTAINER tarent solutions GmbH <info@tarent.de>
+
+# update/install packages
+RUN echo 'force-unsafe-io' | tee /etc/dpkg/dpkg.cfg.d/02apt-speedup && \
+    echo 'DPkg::Post-Invoke {"/bin/rm -f /var/cache/apt/archives/*.deb || true";};' | tee /etc/apt/apt.conf.d/no-cache && \
+    DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get dist-upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        openjdk-7-jre tomcat7 dbconfig-common curl && \
+    apt-get clean && rm -rf /var/cache/apt/*
+
+ENV OSIAM_VERSION $OSIAM_VERSION 
+
+# install OSIAM
+ADD . /install 
+RUN echo 'dbc_install=false' > /etc/dbconfig-common/osiam-${IMAGE}.conf \
+    && DEBIAN_FRONTEND=noninteractive dpkg -i /install/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
+    && cp -r /install/conf/* /etc/osiam/ \
+    && rm -r /install
+
+# expose postgres and tomcat ports
+EXPOSE 8080
+
+ENV CATALINA_BASE /usr/share/osiam
+ENV CATALINA_TMPDIR /tmp/tomcat7-tomcat7-tmp
+
+ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+ENV CATALINA_HOME /usr/share/tomcat7
+ENV JAVA_OPTS "-Djava.awt.headless=true -Xms512m -Xmx1024m"
+ENV CATALINA_PID /var/run/osiam.pid
+RUN mkdir /tmp/tomcat7-tmp
+ENV CATALINA_TMPDIR /tmp/tomcat7-tmp
+
+# start postgres and tomcat via supervisord
+CMD ["/usr/share/tomcat7/bin/catalina.sh", "run"]

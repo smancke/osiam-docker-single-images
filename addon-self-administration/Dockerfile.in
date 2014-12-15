@@ -1,0 +1,11 @@
+
+# OSIAM resource server
+
+FROM smancke/osiam-base-image:$OSIAM_VERSION
+
+MAINTAINER tarent solutions GmbH <info@tarent.de>
+
+# install OSIAM
+RUN curl -o osiam-${IMAGE}_${OSIAM_VERSION}_all.deb -L https://github.com/osiam/distribution/releases/download/v${OSIAM_VERSION}/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb
+RUN dbc_install=false DEBIAN_FRONTEND=noninteractive dpkg -i osiam-${IMAGE}_${OSIAM_VERSION}_all.deb
+RUN rm osiam-${IMAGE}_${OSIAM_VERSION}_all.deb
