@@ -1,5 +1,5 @@
 
-# OSIAM administration addon
+# OSIAM dockerfile template
 
 FROM $REGISTRY/osiam-common:$OSIAM_VERSION
 
@@ -9,5 +9,7 @@ MAINTAINER tarent solutions GmbH <info@tarent.de>
 ADD . /install 
 RUN echo 'dbc_install=false' > /etc/dbconfig-common/osiam-${IMAGE}.conf \
     && DEBIAN_FRONTEND=noninteractive dpkg -i --ignore-depends=osiam-auth-server  --ignore-depends=osiam-resource-server /install/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
-    && test -e /install/osiam-${IMAGE}.properties && cp /install/osiam-${IMAGE}.properties /etc/osiam/ \
+    && /install/replaceProperties.sh /etc/osiam/${IMAGE}.properties \
     && rm -r /install
+
+

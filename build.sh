@@ -14,11 +14,19 @@ for IMAGE in common auth-server resource-server addon-administration addon-self-
     test -e build/$IMAGE/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
         || curl -o build/$IMAGE/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb -L https://github.com/osiam/distribution/releases/download/v${OSIAM_VERSION}/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
         || exit 1
-    cat $IMAGE/Dockerfile.in | envsubst > build/$IMAGE/Dockerfile
 
-    test -e $IMAGE/conf && cp -r $IMAGE/conf build/$IMAGE/
-    test -e $IMAGE/conf/${IMAGE}.properties \
-        && cat $IMAGE/conf/${IMAGE}.properties | envsubst > build/$IMAGE/conf/${IMAGE}.properties
+    # copy the docker file and replace variables
+    #cat $IMAGE/Dockerfile.in | envsubst > build/$IMAGE/Dockerfile
+    cat Dockerfile-$IMAGE.in | envsubst > build/$IMAGE/Dockerfile
+
+    # append all 'OSIAM_' shell variables als ENV defaults in the Dockerfile
+    set | grep OSIAM_ | sed 's/^/ENV /;s/=/ /' >> build/$IMAGE/Dockerfile
+    
+    # replace script to 
+    #   replace the values of configurable properties with shell variables
+    cp replaceProperties.sh build/$IMAGE
+
+    #test -e $IMAGE/conf && cp -r $IMAGE/conf build/$IMAGE/
 
     docker build --tag $REGISTRY/osiam-$IMAGE build/$IMAGE
     docker build --tag $REGISTRY/osiam-$IMAGE:$OSIAM_VERSION build/$IMAGE

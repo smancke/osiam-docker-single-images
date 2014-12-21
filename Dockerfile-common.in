@@ -19,7 +19,6 @@ ENV OSIAM_VERSION $OSIAM_VERSION
 ADD . /install 
 RUN echo 'dbc_install=false' > /etc/dbconfig-common/osiam-${IMAGE}.conf \
     && DEBIAN_FRONTEND=noninteractive dpkg -i /install/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
-    && cp -r /install/conf/* /etc/osiam/ \
     && rm -r /install
 
 # expose postgres and tomcat ports
