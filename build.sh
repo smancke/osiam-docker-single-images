@@ -2,7 +2,7 @@
 
 . build.conf
 
-for IMAGE in common auth-server resource-server; do #  addon-administration addon-self-administration; do
+for IMAGE in common auth-server resource-server addon-administration addon-self-administration; do
     echo 
     echo "-----------------------------------------------"
     echo "-- building: $IMAGE"
@@ -15,7 +15,6 @@ for IMAGE in common auth-server resource-server; do #  addon-administration addo
         || curl -o build/$IMAGE/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb -L https://github.com/osiam/distribution/releases/download/v${OSIAM_VERSION}/osiam-${IMAGE}_${OSIAM_VERSION}_all.deb \
         || exit 1
     cat $IMAGE/Dockerfile.in | envsubst > build/$IMAGE/Dockerfile
-    
 
     test -e $IMAGE/conf && cp -r $IMAGE/conf build/$IMAGE/
     test -e $IMAGE/conf/${IMAGE}.properties \
@@ -25,3 +24,12 @@ for IMAGE in common auth-server resource-server; do #  addon-administration addo
     docker build --tag $REGISTRY/osiam-$IMAGE:$OSIAM_VERSION build/$IMAGE
 done
 
+echo 
+echo "-----------------------------------------------"
+echo "-- building: osiam postgres image"
+echo "-----------------------------------------------"
+
+mkdir -p build/postgresql
+cat postgresql/Dockerfile.in | envsubst > build/postgresql/Dockerfile
+cp -r postgresql/conf build/postgresql/
+docker build --tag postgresql/osiam-postgresql:$OSIAM_VERSION build/postgresql

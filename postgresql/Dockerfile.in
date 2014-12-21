@@ -1,0 +1,26 @@
+# OSIAM resource server
+
+FROM debian:wheezy
+
+MAINTAINER tarent solutions GmbH <info@tarent.de>
+
+# update/install packages
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get dist-upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+                                     sudo postgresql-9.1 postgresql-contrib-9.1 && \
+    apt-get clean && rm -rf /var/cache/apt/*
+
+
+ADD . /install 
+
+RUN  /etc/init.d/postgresql start &&\
+     sudo -u postgres psql -c "CREATE USER $OSIAM_DB_USERNAME WITH PASSWORD '$OSIAM_DB_PASSWORD';" &&\
+     sudo -u postgres psql -c "CREATE DATABASE $OSIAM_DB_NAME;"  &&\
+     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $OSIAM_DB_NAME TO $OSIAM_DB_USERNAME;" &&\
+     sudo -u postgres psql osiam < /install/conf/resource-server.sql &&\
+     sudo -u postgres psql osiam < /install/conf/auth-server.sql
+
+RUN rm -r /install
+
+EXPOSE 5432
+CMD ["postgres"]
