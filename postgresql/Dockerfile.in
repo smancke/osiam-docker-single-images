@@ -14,9 +14,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get dist-upgrade -y 
 ADD . /install 
 
 RUN  /etc/init.d/postgresql start &&\
-     sudo -u postgres psql -c "CREATE USER $OSIAM_DB_USERNAME WITH PASSWORD '$OSIAM_DB_PASSWORD';" &&\
-     sudo -u postgres psql -c "CREATE DATABASE $OSIAM_DB_NAME;"  &&\
-     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $OSIAM_DB_NAME TO $OSIAM_DB_USERNAME;" &&\
+     sudo -u postgres psql -c "CREATE USER $DB_USERNAME WITH PASSWORD '$DB_PASSWORD';" &&\
+     sudo -u postgres psql -c "CREATE DATABASE $DB_NAME;"  &&\
+     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USERNAME;" &&\
      sudo -u postgres psql osiam < /install/conf/resource-server.sql &&\
      sudo -u postgres psql osiam < /install/conf/auth-server.sql
 
